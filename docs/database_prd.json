@@ -1,0 +1,412 @@
+{
+    "project_name": "Skripsi AI Backend",
+    "version": "1.0.0",
+    "last_updated": "2026-09-17",
+    "author": "Kulonit",
+    "description": "PRD Spesifikasi & Alur Relasi Database PostgreSQL untuk MVP Skripsi AI.",
+    "tech_stack": {
+        "backend": "Laravel 11 / Filament v3",
+        "database": "PostgreSQL",
+        "cache_and_queue": "Redis"
+    },
+    "entities": [
+        {
+            "table_name": "users",
+            "description": "Menyimpan data pengguna (mahasiswa) beserta saldo token aktif.",
+            "columns": [
+                {
+                    "name": "id_user",
+                    "type": "BIGINT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR(255)",
+                    "nullable": false
+                },
+                {
+                    "name": "email",
+                    "type": "VARCHAR(255)",
+                    "unique": true,
+                    "nullable": false
+                },
+                {
+                    "name": "password",
+                    "type": "VARCHAR(255)",
+                    "nullable": false
+                },
+                {
+                    "name": "login_provider",
+                    "type": "ENUM('Email', 'Google')",
+                    "default": "Email"
+                },
+                {
+                    "name": "token_balance",
+                    "type": "INT",
+                    "default": 250,
+                    "description": "Saldo token aktif pengguna"
+                },
+                {
+                    "name": "created_at",
+                    "type": "TIMESTAMP"
+                },
+                {
+                    "name": "updated_at",
+                    "type": "TIMESTAMP"
+                }
+            ]
+        },
+        {
+            "table_name": "plans",
+            "description": "Master paket langganan dan kuota token.",
+            "columns": [
+                {
+                    "name": "id_plan",
+                    "type": "INT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "name_plan",
+                    "type": "VARCHAR(100)",
+                    "nullable": false
+                },
+                {
+                    "name": "token_quota",
+                    "type": "INT",
+                    "nullable": false
+                },
+                {
+                    "name": "price",
+                    "type": "DECIMAL(10,2)",
+                    "nullable": false
+                },
+                {
+                    "name": "duration",
+                    "type": "INT",
+                    "description": "Durasi paket dalam hari"
+                }
+            ]
+        },
+        {
+            "table_name": "subscriptions",
+            "description": "Riwayat langganan aktif/kadaluwarsa pengguna.",
+            "columns": [
+                {
+                    "name": "id_subscription",
+                    "type": "BIGINT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "id_user",
+                    "type": "BIGINT",
+                    "foreign_key": "users.id_user"
+                },
+                {
+                    "name": "id_plan",
+                    "type": "INT",
+                    "foreign_key": "plans.id_plan"
+                },
+                {
+                    "name": "status",
+                    "type": "ENUM('Active', 'Expired', 'Cancelled')",
+                    "default": "Active"
+                },
+                {
+                    "name": "expired_at",
+                    "type": "DATETIME",
+                    "nullable": false
+                }
+            ]
+        },
+        {
+            "table_name": "token_transactions",
+            "description": "Ledger transaksi mutasi saldo token (Debit/Credit) untuk audit log.",
+            "columns": [
+                {
+                    "name": "id_transaction",
+                    "type": "BIGINT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "id_user",
+                    "type": "BIGINT",
+                    "foreign_key": "users.id_user"
+                },
+                {
+                    "name": "transaction_type",
+                    "type": "ENUM('Debit', 'Credit')",
+                    "nullable": false
+                },
+                {
+                    "name": "feature_tag",
+                    "type": "VARCHAR(100)",
+                    "description": "Nama fitur pemakai (misal: generate_title, paraphrase)"
+                },
+                {
+                    "name": "amount",
+                    "type": "INT",
+                    "nullable": false
+                },
+                {
+                    "name": "balance_after",
+                    "type": "INT",
+                    "nullable": false
+                },
+                {
+                    "name": "created_at",
+                    "type": "TIMESTAMP"
+                }
+            ]
+        },
+        {
+            "table_name": "study_roles",
+            "description": "Kategori jurusan beserta system prompt khusus AI (Default MVP: Informatika/IT).",
+            "columns": [
+                {
+                    "name": "id_role",
+                    "type": "INT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "name_role",
+                    "type": "VARCHAR(100)",
+                    "nullable": false
+                },
+                {
+                    "name": "description",
+                    "type": "TEXT"
+                },
+                {
+                    "name": "system_prompt",
+                    "type": "TEXT",
+                    "nullable": false
+                },
+                {
+                    "name": "is_active",
+                    "type": "BOOLEAN",
+                    "default": true
+                }
+            ]
+        },
+        {
+            "table_name": "writing_styles",
+            "description": "Opsi gaya penulisan output AI (Default MVP: Formal & Akademik).",
+            "columns": [
+                {
+                    "name": "id_style",
+                    "type": "INT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "name_style",
+                    "type": "VARCHAR(100)",
+                    "nullable": false
+                },
+                {
+                    "name": "description",
+                    "type": "TEXT"
+                },
+                {
+                    "name": "instruction",
+                    "type": "TEXT",
+                    "nullable": false
+                },
+                {
+                    "name": "is_active",
+                    "type": "BOOLEAN",
+                    "default": true
+                },
+                {
+                    "name": "created_at",
+                    "type": "TIMESTAMP"
+                },
+                {
+                    "name": "updated_at",
+                    "type": "TIMESTAMP"
+                }
+            ]
+        },
+        {
+            "table_name": "sessions",
+            "description": "Sesi percakapan/diskusi skripsi per topik pengguna.",
+            "columns": [
+                {
+                    "name": "id_session",
+                    "type": "BIGINT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "id_user",
+                    "type": "BIGINT",
+                    "foreign_key": "users.id_user"
+                },
+                {
+                    "name": "id_role",
+                    "type": "INT",
+                    "foreign_key": "study_roles.id_role"
+                },
+                {
+                    "name": "id_style",
+                    "type": "INT",
+                    "foreign_key": "writing_styles.id_style"
+                },
+                {
+                    "name": "thesis_title",
+                    "type": "VARCHAR(255)",
+                    "nullable": true
+                },
+                {
+                    "name": "research_topic",
+                    "type": "TEXT",
+                    "nullable": false
+                },
+                {
+                    "name": "research_detail",
+                    "type": "TEXT",
+                    "nullable": true
+                },
+                {
+                    "name": "created_at",
+                    "type": "TIMESTAMP"
+                },
+                {
+                    "name": "updated_at",
+                    "type": "TIMESTAMP"
+                }
+            ]
+        },
+        {
+            "table_name": "generations",
+            "description": "Event pemicu pemanggilan AI dalam suatu sesi diskusi.",
+            "columns": [
+                {
+                    "name": "id_generate",
+                    "type": "BIGINT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "id_session",
+                    "type": "BIGINT",
+                    "foreign_key": "sessions.id_session"
+                },
+                {
+                    "name": "created_at",
+                    "type": "TIMESTAMP"
+                }
+            ]
+        },
+        {
+            "table_name": "title_recommendations",
+            "description": "Daftar opsi judul skripsi hasil generasi AI.",
+            "columns": [
+                {
+                    "name": "id_title",
+                    "type": "BIGINT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "id_generate",
+                    "type": "BIGINT",
+                    "foreign_key": "generations.id_generate"
+                },
+                {
+                    "name": "title",
+                    "type": "TEXT",
+                    "nullable": false
+                },
+                {
+                    "name": "explanation",
+                    "type": "TEXT",
+                    "nullable": false
+                }
+            ]
+        },
+        {
+            "table_name": "paraphrase_requests",
+            "description": "Riwayat penggunaan fitur standalone parafrase teks skripsi.",
+            "columns": [
+                {
+                    "name": "id_paraphrase",
+                    "type": "BIGINT",
+                    "primary_key": true,
+                    "auto_increment": true
+                },
+                {
+                    "name": "id_user",
+                    "type": "BIGINT",
+                    "foreign_key": "users.id_user"
+                },
+                {
+                    "name": "original_text",
+                    "type": "TEXT",
+                    "nullable": false
+                },
+                {
+                    "name": "paraphrase_text",
+                    "type": "TEXT",
+                    "nullable": false
+                },
+                {
+                    "name": "created_at",
+                    "type": "TIMESTAMP"
+                }
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "from": "plans.id_plan",
+            "to": "subscriptions.id_plan",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "users.id_user",
+            "to": "subscriptions.id_user",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "users.id_user",
+            "to": "token_transactions.id_user",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "users.id_user",
+            "to": "paraphrase_requests.id_user",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "users.id_user",
+            "to": "sessions.id_user",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "study_roles.id_role",
+            "to": "sessions.id_role",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "writing_styles.id_style",
+            "to": "sessions.id_style",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "sessions.id_session",
+            "to": "generations.id_session",
+            "type": "One-to-Many"
+        },
+        {
+            "from": "generations.id_generate",
+            "to": "title_recommendations.id_generate",
+            "type": "One-to-Many"
+        }
+    ]
+}

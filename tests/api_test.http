@@ -1,0 +1,50 @@
+@baseUrl = http://localhost:8000
+
+### 1. Get Active Study Roles
+GET {{baseUrl}}/api/study-roles
+Accept: application/json
+
+### 2. Get Active Writing Styles
+GET {{baseUrl}}/api/writing-styles
+Accept: application/json
+
+### 3. Get Subscription Plans
+GET {{baseUrl}}/api/plans
+Accept: application/json
+
+### 4. Get User Sessions List
+GET {{baseUrl}}/api/sessions
+Accept: application/json
+
+### 5. Create New Session
+POST {{baseUrl}}/api/sessions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id_role": 1,
+  "id_style": 1,
+  "research_topic": "Penerapan Machine Learning untuk Deteksi Dini Penyakit Tanaman Padi",
+  "thesis_title": "Implementasi Algoritma Random Forest pada Penyakit Daun Padi",
+  "research_detail": "Penelitian ini bertujuan untuk mengklasifikasi citra daun padi menggunakan ekstraksi fitur tekstur dan warna."
+}
+
+### 6. Delete Session by ID
+DELETE {{baseUrl}}/api/sessions/1
+Accept: application/json
+
+### 7. Generate Titles (Deduct 10 Tokens)
+POST {{baseUrl}}/api/sessions/1/generate-titles
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### 8. Paraphrase Text (Deduct 5 Tokens)
+POST {{baseUrl}}/api/paraphrase
+Content-Type: application/json
+Accept: application/json
+
+{
+  "original_text": "Penggunaan metode deep learning pada bidang pengolahan citra medis telah mengalami peningkatan pesat dalam beberapa tahun terakhir karena akurasinya yang tinggi."
+}
